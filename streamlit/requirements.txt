@@ -1,0 +1,4 @@
+clickhouse-connect
+pandas
+plotly
+streamlit

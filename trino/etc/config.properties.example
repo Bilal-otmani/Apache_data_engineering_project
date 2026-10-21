@@ -1,0 +1,15 @@
+coordinator=true
+node-scheduler.include-coordinator=true
+
+http-server.https.enabled=true
+http-server.https.port=8443
+http-server.authentication.type=PASSWORD
+http-server.https.keystore.path=/etc/trino/keystore.jks
+http-server.https.keystore.key=replace-with-keystore-password
+password-authenticator.config-files=/etc/trino/password-authenticator.properties
+
+http-server.authentication.allow-insecure-over-http=true
+discovery.uri=https://trino:8443
+
+internal-communication.https.required=true
+internal-communication.shared-secret=replace-with-a-random-secret-of-at-least-32-bytes

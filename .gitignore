@@ -1,0 +1,26 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Generated or personal data
+segmented_users_*.csv
+superset/superset_db_data/
+superset/superset_home/
+
+# Local credentials and private keys
+seaweedfs/s3.json
+clickhouse/default-password.xml
+trino/etc/config.properties
+trino/etc/catalog/*.properties
+!trino/etc/catalog/*.properties.example
+trino/etc/password.db
+trino/etc/keystore.jks
+
+# Downloaded third-party connector binaries
+flink-connectors/*.jar
+spark/jars/*.jar

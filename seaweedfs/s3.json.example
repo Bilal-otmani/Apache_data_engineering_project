@@ -1,0 +1,19 @@
+{
+  "identities": [
+    {
+      "name": "local-user",
+      "credentials": [
+        {
+          "accessKey": "replace-with-seaweedfs-access-key",
+          "secretKey": "replace-with-seaweedfs-secret-key"
+        }
+      ],
+      "actions": [
+        "Admin",
+        "Read",
+        "Write",
+        "List"
+      ]
+    }
+  ]
+}

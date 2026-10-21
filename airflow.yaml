@@ -1,0 +1,82 @@
+x-airflow-common:
+  &airflow-common
+  build:
+    context: ./airflow 
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: ${AIRFLOW_DB_URL:?Set AIRFLOW_DB_URL in .env}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY:?Set AIRFLOW_SECRET_KEY in .env}
+    AIRFLOW_ADMIN_USERNAME: ${AIRFLOW_ADMIN_USERNAME:?Set AIRFLOW_ADMIN_USERNAME in .env}
+    AIRFLOW_ADMIN_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?Set AIRFLOW_ADMIN_PASSWORD in .env}
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'True'
+    AIRFLOW__SMTP__SMTP_HOST: mailhog
+    AIRFLOW__SMTP__SMTP_PORT: 1025
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: airflow@example.com
+    AIRFLOW__SMTP__SMTP_STARTTLS: 'False'
+    AIRFLOW__SMTP__SMTP_SSL: 'False'
+    AIRFLOW__SMTP__SMTP_USER: ''
+    AIRFLOW__SMTP__SMTP_PASSWORD: ''
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID in .env}
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY in .env}
+    AWS_DEFAULT_REGION: us-east-1
+    S3_ENDPOINT_URL: http://seaweedfs:8333
+ 
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+  networks:
+      iceberg_net:
+
+services:
+  airflow-db:
+    container_name: airflow-db
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${AIRFLOW_DB_USER:?Set AIRFLOW_DB_USER in .env}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:?Set AIRFLOW_DB_PASSWORD in .env}
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    networks:
+      iceberg_net:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow-webserver:
+    container_name: airflow-webserver
+    <<: *airflow-common
+    ports:
+      - "8081:8080"
+    command: webserver
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    container_name: airflow-scheduler
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    container_name: airflow-init
+    <<: *airflow-common
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --username "$${AIRFLOW_ADMIN_USERNAME}" --password "$${AIRFLOW_ADMIN_PASSWORD}" --firstname Admin --lastname User --role Admin --email admin@example.com
+      "
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+
+volumes:
+  airflow_db_data:
+
+networks:
+  iceberg_net:
+    external: true
+    name: dataeng_iceberg_net
