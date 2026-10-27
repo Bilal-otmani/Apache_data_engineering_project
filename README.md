@@ -1,3 +1,4 @@
+<img width="6947" height="8984" alt="diagram" src="https://github.com/user-attachments/assets/2e2f7062-15d8-4325-bdda-f33406b42ff8" />
 # Data Engineering Project
 
 This repository contains a local data-engineering stack using Docker Compose, including
